@@ -2,7 +2,7 @@
 
 ---
 
-![fit](uni.png)
+![fit left](fokko.png)
 
 # Whoami
 
@@ -11,6 +11,19 @@
 - Code Connaisseur at GoDataDriven
 - Committer at Apache `{Airflow,Avro,Parquet,Druid}`
 - Databricks champion
+
+---
+
+![fit left](vodata.gif)
+
+# GoDataDriven
+
+- Amsterdam based
+- Around 50 Consultants on Data `{Engineer,Science}`
+- Part of the Xebia Group
+- Used to do Hadoop stuff
+- Now the cloud
+- However, Spark is here to stay
 
 ---
 
@@ -24,15 +37,6 @@
 
 ---
 
-# GoDataDriven
-
-- Amsterdam based
-- Around 50 Consultants on Data `{Engineer,Science}`
-- Part of the Xebia Group
-- Used to do all Hadoop stuff, now the cloud
-- However, Spark is here to stay
-
----
 
 # History
 
@@ -66,17 +70,46 @@
 - Stream processing
 - Machine learning
 
----
-
-![fit](spark-architecture.png)
 
 ---
 
 # User's program language support
 
-- Dataframe (Scala, Java, Python, SQL, R)
+- Dataframe (**SQL**, Scala, Java, Python, R)
 - DataSet (Scala)
 - RDD (Scala, Java, Python)
+
+---
+
+# Overview of the landscape
+
+![fit inline](overview.png)
+
+---
+
+# BFF: Spark :heart: Parquet
+
+- Apache Parquet
+- Open File format introduced at Twitter[^1]
+- Designed for OLAP workloads[^2]
+
+[^1]: [Data Serialization Formats with Doug Cutting and Julien Le Dem](https://www.dataengineeringpodcast.com/data-serialization-with-doug-cutting-and-julien-le-dem-episode-8/)
+
+[^2]: [The Parquet Format and Performance Optimization Opportunities Boudewijn Braams (Databricks)](https://www.youtube.com/watch?v=1j8SdS7s_NY)
+
+---
+
+# Apache Parquet Row Groups
+
+![inline](parquet.png)
+
+[.footer: Borrowed image from: https://www.dremio.com/tuning-parquet/]
+
+---
+
+# Example query
+
+![inline](query.png)
 
 ---
 
@@ -117,6 +150,16 @@
 ---
 
 # Live demo using Databricks
+
+---
+
+
+```
+pip install dot-spark
+mkdir dbtlake
+cd dbtlake
+dbt init  
+```
 
 ---
 
