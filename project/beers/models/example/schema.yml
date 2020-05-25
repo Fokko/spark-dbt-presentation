@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+    - name: default
+      tables:
+        - name: beers_csv
+
+models:
+  - name: avg_abv_per_style.sql

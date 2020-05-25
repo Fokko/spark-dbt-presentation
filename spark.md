@@ -1,4 +1,4 @@
-![inline	](luv.png)
+![inline](luv.png)
 
 ---
 
@@ -7,7 +7,7 @@
 # Whoami
 
 - Fokko Driesprong
-- Master Computer Science: Distributed Systems
+- Master Computer Science: Distributed Systems at University of Groningen
 - Code Connaisseur at GoDataDriven
 - Committer at Apache `{Airflow,Avro,Parquet,Druid}`
 - Databricks champion
@@ -18,25 +18,24 @@
 
 # GoDataDriven
 
-- Amsterdam based
-- Around 50 Consultants on Data `{Engineer,Science}`
+- Amsterdam based Consultancy company
+- Around 50 Consultants on Data `{Engineer,Science,Strategy}`
 - Part of the Xebia Group
 - Used to do Hadoop stuff
-- Now the cloud
+- Big shift to cloud native
 - However, Spark is here to stay
 
 ---
 
 # Agenda
 
-- History
+- Why DBT + Spark?
 - Introduction into Apache Spark
 - Spark vs Traditional DWH's
 - Live demo using Databricks
-- ACID using Spark
+- ACID data formats using Apache Spark
 
 ---
-
 
 # History
 
@@ -44,8 +43,13 @@
 
 # GoDataDriven + DBT
 
-- Merge between Datawarehouses and Datalakes? (Datalakehouse?)
+- Make companies successful with Data
+- Using big data (un+structured)
+- Datalake and Datawarehouse separate entities
+- Rise of the Datalakehouse[^1]
 - Democratizing Analytics
+
+[^1]: https://databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html
 
 ---
 
@@ -53,23 +57,25 @@
 
 ---
 
-# History
-
-- Started < 2013 at Berkeley University
+- Started 2013 at Berkeley University
 - Donated in May 2014 to the Apache Software Foundation
 - Response to the old Mapreduce framework
 	- Only a Java API (boilerplate!)
 	- Slow and limited operations
-- [Won the record](https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html) in 2014 on distributed sorting
+- Won the record in 2014 on distributed sorting[^2]
+
+[^2]: https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html
 
 ---
 
 # Common use-cases
 
-- Extract, transform, and load (ETL)
+- Extract, load and transform (ELT)[^3]
 - Stream processing
 - Machine learning
+- BI workloads
 
+[^3]: The Promise of ELT Over ETL: Analysis, Not Paralysis: https://fivetran.com/blog/elt_vs_etl
 
 ---
 
@@ -90,12 +96,13 @@
 # BFF: Spark :heart: Parquet
 
 - Apache Parquet
-- Open File format introduced at Twitter[^1]
-- Designed for OLAP workloads[^2]
+- De facto format for big data
+- Open File format introduced at Twitter[^4]
+- Designed for OLAP workloads[^5]
 
-[^1]: [Data Serialization Formats with Doug Cutting and Julien Le Dem](https://www.dataengineeringpodcast.com/data-serialization-with-doug-cutting-and-julien-le-dem-episode-8/)
+[^4]: [Data Serialization Formats with Doug Cutting and Julien Le Dem](https://www.dataengineeringpodcast.com/data-serialization-with-doug-cutting-and-julien-le-dem-episode-8/)
 
-[^2]: [The Parquet Format and Performance Optimization Opportunities Boudewijn Braams (Databricks)](https://www.youtube.com/watch?v=1j8SdS7s_NY)
+[^5]: [The Parquet Format and Performance Optimization Opportunities Boudewijn Braams (Databricks)](https://www.youtube.com/watch?v=1j8SdS7s_NY)
 
 ---
 
@@ -105,38 +112,13 @@
 
 [.footer: Borrowed image from: https://www.dremio.com/tuning-parquet/]
 
+<!--
 ---
 
-# Example query
+# Spark and DBT
 
-![inline](query.png)
-
----
-
-# Software engineering practices
-
-- Four eyes principle
-- Templating using Jinja2
-- Deployment using Docker
-- Data testing
-
----
-
-# Spark vs Traditional DWH's
-
----
-
-# Database vs Datalake
-
-- **Datawarehouses**: Validation on writing
-- **Datalakes**: Validation on reading
-
----
-
-## Separate storage and compute
-
-- Decoupled storage and compute
-- Scale indepdendently
+![inline](meme.jpg)
+-->
 
 ---
 
@@ -149,13 +131,19 @@
 
 ---
 
+# Example query
+
+![inline](query.png)
+
+
+---
+
 # Live demo using Databricks
 
 ---
 
-
 ```
-pip install dot-spark
+pip install dbt-spark
 mkdir dbtlake
 cd dbtlake
 dbt init  
@@ -163,38 +151,147 @@ dbt init
 
 ---
 
-# ACID using Spark
+```yaml
+default:
+  target: dev
+  outputs:
+    dev:
+      method: http
+      type: spark
+      schema: fokko
+      organization: "..."
+      host: "westeurope.azuredatabricks.net"
+      port: 443
+      token: "..."
+      cluster: "..."
+      connect_retries: 20
+      connect_timeout: 60
+      threads: 8
+
+config:
+  send_anonymous_usage_stats: False
+```
 
 ---
 
-### What's ACID?
+```python
+{{
+  config(
+    materialized='table',
+    post_hook=[
+        'ANALYZE TABLE {{ this }} COMPUTE STATISTICS'
+    ]
+  )
+}}
+```
 
-- **Atomicity** guarantees that each transaction is treated as a single "unit".
-- **Consistency** ensures that a transaction can only bring the database from one valid state to another.
-- **Isolation** ensures that concurrent execution of transactions leaves the lake in the same state as if the transactions were executed sequentially.
-- **Durability** guarantees that once a transaction has been committed, it will remain committed even in the case of a system failure.
+```sql
+SELECT style, AVG(abv) AS abv
+FROM {{ source('default', 'beers_csv') }}
+GROUP BY style
+ORDER BY AVG(abv) DESC
+```
 
 ---
 
-# Database vs Datalake
+```
+version: 2
 
-- **Datawarehouses**: Validation on writing
-- **Datalakes**: Validation on reading
+sources:
+    - name: default
+      tables:
+        - name: beers_csv
+
+models:
+  - name: avg_abv_per_style.sql
+
+```
 
 ---
 
-# Common issues
+# ACID dataformats
 
-- Failed production jobs
-- No schema enforcement
-- No reading and writing
+---
+
+# Why?
+
+- GDPR
+- Performance
+- Reliability
 
 ---
 
 # Delta lake
 
-- Open Format based on Parquet
 - Adds ACID transactions on top
+- Open Format on top of Parquet
+- Allows concurrency
+- Using a transaction log[^6]
+- https://github.com/delta-io/delta
+
+[^6]: https://databricks.com/blog/2019/08/21/diving-into-delta-lake-unpacking-the-transaction-log.html
+
+![fit right](delta-lake-logo.png)
+
+---
+
+![inline](Iceberg-logo.png)
+
+- Started at Netflix
+- Open Format on top of Apache `{Parquet,Avro,ORC}`
+- Open specification[^7]
+
+[^7]: https://iceberg.apache.org/spec/
+
+---
+
+# CRUD
+
+---
+
+# Create
+
+- Writes the data
+- Creates a first version
+
+![right fit](iceberg-manifest-create.jpg)
+
+---
+
+# Insert
+
+- Write more files
+- Bump the version
+
+![right fit](iceberg-manifest-insert.png)
+
+---
+
+# Read
+
+- Take a specific version
+- Versions are immutable
+
+![right fit](iceberg-manifest-insert.png)
+
+---
+
+# Update / Delete
+
+- Read existing data
+- Update the record
+- Include the new data files
+
+![right fit](iceberg-manifest-delete.jpg)
+
+---
+
+# Including free stuff
+
+- Compaction
+- Time travel[^8]
+
+[^8]: https://iceberg.apache.org/spark/#time-travel
 
 ---
 
