@@ -57,11 +57,11 @@
 
 ---
 
+- Written in Scala
 - Started 2013 at Berkeley University
 - Donated in May 2014 to the Apache Software Foundation
 - Response to the old Mapreduce framework
-	- Only a Java API (boilerplate!)
-	- Slow and limited operations
+	- Only a Java API (boilerplate!), Slow and limited
 - Won the record in 2014 on distributed sorting[^2]
 
 [^2]: https://databricks.com/blog/2014/11/05/spark-officially-sets-a-new-record-in-large-scale-sorting.html
@@ -191,6 +191,21 @@ FROM {{ source('default', 'beers_csv') }}
 GROUP BY style
 ORDER BY AVG(abv) DESC
 ```
+
+---
+
+## Con's
+
+- Limited mature DWH capabilities
+- Slow startup
+
+---
+
+## Pro's
+
+- Big Data
+- Open source
+- No data captivity
 
 ---
 
